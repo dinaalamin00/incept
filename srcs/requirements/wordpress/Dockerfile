@@ -1,24 +1,21 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
+# Install dependencies
+RUN apt-get update && apt-get install -y php8.2-fpm php8.2-mysql wget curl mariadb-client && \
+    rm -rf /var/lib/apt/lists/*
+# Copy configuration
+COPY conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 
-RUN apt update && apt install -y \
-    wget \
-    curl \
-    sendmail \
-    php-mysql \
-    php-mysqli \
-    mariadb-client \
-    php \
-    php-fpm && \
-    mkdir -p /run/php
+# Setup WordPress directory
+RUN mkdir -p /var/www/html && \
+    chown www-data:www-data /var/www/html && \
+    chmod 755 /var/www/html
 
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-    chmod +x wp-cli.phar && \
-    mv wp-cli.phar /usr/local/bin/wp
+# Copy setup script
+COPY tools/setup_wp.sh /setup_wp.sh
+RUN chmod +x /setup_wp.sh
 
-COPY conf/www.conf /etc/php/7.4/fpm/pool.d/
-COPY tools/init_wp.sh /usr/local/bin/init_wp.sh
+# Expose port 9000
+EXPOSE 9000
 
-RUN chmod +x /usr/local/bin/init_wp.sh
-
-ENTRYPOINT ["/usr/local/bin/init_wp.sh"]
+ENTRYPOINT ["/setup_wp.sh"]

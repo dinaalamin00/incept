@@ -1,78 +1,55 @@
-version: '3.9'
-
 services:
   mariadb:
-    build:
-      context: ./requirements/mariadb
-      dockerfile: Dockerfile
+    build: ./requirements/mariadb
     container_name: mariadb
-    env_file: ./.env
-    environment:
-      - DB_ROOT_PASS=${DB_ROOT_PASS}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - DB_NAME=${DB_NAME}
+    env_file: .env
     volumes:
-      - mariadb_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    restart: always
+      - db_data:/var/lib/mysql
     networks:
-      - inception_network
+      - inception_net
+    restart: always
 
   wordpress:
-    build:
-      context: ./requirements/wordpress
-      dockerfile: Dockerfile
+    build: ./requirements/wordpress
     container_name: wordpress
-    env_file: ./.env
-    environment:
-      - DB_HOST=mariadb
-      - WORDPRESS_DB_USER=${DB_USER}
-      - WORDPRESS_DB_PASSWORD=${DB_PASS}
-      - WORDPRESS_DB_NAME=${DB_NAME}
+    env_file: .env
     volumes:
-      - wordpress:/var/www/html/wordpress
-    ports:
-      - "9000:9000"
+      - wp_data:/var/www/html
+    networks:
+      - inception_net
     depends_on:
       - mariadb
+    ports:
+      - "9000:9000"
     restart: always
-    networks:
-      - inception_network
 
   nginx:
-    build:
-      context: ./requirements/nginx
-      dockerfile: Dockerfile
+    build: ./requirements/nginx
     container_name: nginx
-    env_file: ./.env
-    ports:
-      - "443:443"
     volumes:
-      - wordpress:/var/www/html/wordpress
+      - wp_data:/var/www/html
+      - ./requirements/nginx/certs:/etc/nginx/certs
+    networks:
+      - inception_net
     depends_on:
       - wordpress
+    ports:
+      - "443:443"
     restart: always
-    networks:
-      - inception_network
-
-networks:
-  inception_network:
-    driver: bridge
 
 volumes:
-  wordpress:
-    name: wordpress
+  db_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/diahmed/data/wordpress
+      device: /home/diahmed/data/db
       o: bind
-  mariadb_data:
-    name: mariadb_data
+  wp_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/diahmed/data/mariadb_data
+      device: /home/diahmed/data/website
       o: bind
+
+networks:
+  inception_net:
