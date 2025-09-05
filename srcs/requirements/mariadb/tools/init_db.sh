@@ -4,10 +4,8 @@
 if [ ! -d /var/lib/mysql/wordpress ]; then
     mysql_install_db --user=mysql --datadir=/var/lib/mysql
 
-    mysqld_safe --skip-networking &  # Start temporarily without network for init
-    sleep 5  # Wait for startup
-
-    mysql -u root <<EOF
+    # Create initialization SQL file
+    cat > /tmp/init.sql <<EOF
 FLUSH PRIVILEGES;
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
 CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
@@ -18,7 +16,11 @@ GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_ADMIN_USER}'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EOF
 
-    mysqladmin -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
+    # Start MariaDB with initialization file and wait for completion
+    mysqld --user=mysql --init-file=/tmp/init.sql --console
+    
+    # Clean up
+    rm -f /tmp/init.sql
 fi
 
 # Run MariaDB server in foreground
