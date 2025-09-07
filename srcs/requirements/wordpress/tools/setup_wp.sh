@@ -18,5 +18,5 @@ if [ ! -f /var/www/html/wp-config.php ]; then
     wp user create ${MYSQL_USER} ${WP_USER_EMAIL} --role=editor --user_pass=${WP_USER_PASSWORD} --allow-root
 fi
 
-# Run PHP-FPM in foreground
+# Run PHP-FPM
 exec php-fpm8.2 -F

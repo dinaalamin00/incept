@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-# Start nginx with the existing configuration
+# Start nginx
 nginx -g "daemon off;"

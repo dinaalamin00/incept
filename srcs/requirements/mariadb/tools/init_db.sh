@@ -16,12 +16,12 @@ GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_ADMIN_USER}'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EOF
 
-    # Start MariaDB with initialization file and wait for completion
+    # Start MariaDB 
     mysqld --user=mysql --init-file=/tmp/init.sql --console
     
     # Clean up
     rm -f /tmp/init.sql
 fi
 
-# Run MariaDB server in foreground
+# Run MariaDB server
 exec mysqld --user=mysql --console
