@@ -13,6 +13,7 @@ clean: down
 
 fclean: clean
 	docker-compose -f srcs/docker-compose.yml down -v --rmi all
+	docker rmi debian:bookworm
 	sudo rm -rf /home/${USER}/data
 	docker network prune --force
 
